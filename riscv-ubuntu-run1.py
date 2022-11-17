@@ -75,7 +75,7 @@ cache_hierarchy = PrivateL1PrivateL2CacheHierarchy(
     l2_size="512kB",
     l1d_assoc=8,
     l1i_assoc=8,
-    l2_assoc=8
+    l2_assoc=8,
 )
 
 # Memory: Dual Channel DDR4 2400 DRAM device.
@@ -99,8 +99,11 @@ board = SimpleBoard(
 # Set the workload for the board
 board.set_se_binary_workload(
     binary=CustomResource(
-        local_path="tests/test-progs/cpre581_hw3/bin/bzip2 -o 'tests/test-progs/cpre581_hw3/src/dryer.jpg 2'",
-        metadata={}
+        local_path="tests/test-progs/cpre581_hw1/bin/matrix_prog_riscv_static",
+        # local_path="tests/test-progs/hello/bin/riscv/linux/hello",
+        # local_path="tests/test-progs/cpre581_hw3/bin/bzip2",
+        metadata={},
+        # metadata={"-o": "tests/test-progs/cpre581_hw3/src/dryer.jpg 2"}
     )
 )
 
