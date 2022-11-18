@@ -20,8 +20,10 @@ from os import path
 import m5
 from m5.defines import buildEnv
 from m5.objects import *
+# from m5.objects.Uart import RiscvUart8250
 from m5.util import addToPath, fatal, warn
 from m5.util.fdthelper import *
+from m5.params import *
 
 addToPath('../../../')
 
@@ -111,29 +113,38 @@ np = args.num_cpus
 system = System()
 
 system.mem_mode = mem_mode
-system.mem_ranges = [AddrRange(start=0x80000000, size=args.mem_size)]
+system.mem_ranges = [AddrRange(start=0x40000000, size=args.mem_size)]
 
 system.iobus = IOXBar()
-system.membus = MemBus()
+system.membus = MemBus()    # TODO? difference between SystemXBar() and MemBus() ?
 
 system.system_port = system.membus.cpu_side_ports
 
-# TODO ssz not working correctly: HiFive Platform
-system.platform = HiFive()
+# TODO ssz HiFive platform not working correctly.
+# system.platform = HiFive()
 
 # RTCCLK (Set to 100MHz for faster simulation)
 # system.platform.rtc = RiscvRTC(frequency=Frequency("100MHz"))
 # system.platform.clint.int_pin = system.platform.rtc.int_pin
 
-system.bridge = Bridge(delay='50ns')
-system.bridge.mem_side_port = system.iobus.cpu_side_ports
-system.bridge.cpu_side_port = system.membus.mem_side_ports
-system.bridge.ranges = system.platform._off_chip_ranges()
+# No need for CLINT due to no peripherals and interrupts
+# clint = Param.Clint(Clint(pio_addr=0x2000000), "CLINT")
 
-system.platform.attachOnChipIO(system.membus)
-system.platform.attachOffChipIO(system.iobus)
-system.platform.attachPlic()
-system.platform.setNumCores(np)
+# No need for PLIC due to no peripherals and interrupts
+# plic = Param.Plic(Plic(pio_addr=0x3000000), "PLIC")
+
+# Uart requires PLIC and is not needed
+# uart = RiscvUart8250(pio_addr=0x10000000)
+
+# system.bridge = Bridge(delay='50ns')
+# system.bridge.mem_side_port = system.iobus.cpu_side_ports
+# system.bridge.cpu_side_port = system.membus.mem_side_ports
+# system.bridge.ranges = AddrRange[0x10000000, 0x8]     # Should only include UART but we do not use it so it may have a range of 0. system.platform._off_chip_ranges()
+
+# system.platform.attachOnChipIO(system.membus)
+# system.platform.attachOffChipIO(system.iobus)
+# system.platform.attachPlic()
+# system.platform.setNumCores(np)
 
 
 # ---------------------------- Default Setup --------------------------- #
@@ -191,16 +202,16 @@ for i in range(np):
 
 
 # ----------------------------- PMA Checker ---------------------------- #
-uncacheable_range = [
-    *system.platform._on_chip_ranges(),
-    *system.platform._off_chip_ranges()
-]
+# uncacheable_range = [
+#     *system.platform._on_chip_ranges(),
+#     *system.platform._off_chip_ranges()
+# ]
 
 # PMA checker can be defined at system-level (system.pma_checker)
 # or MMU-level (system.cpu[0].mmu.pma_checker). It will be resolved
 # by RiscvTLB's Parent.any proxy
-for cpu in system.cpu:
-    cpu.mmu.pma_checker = PMAChecker(uncacheable=uncacheable_range)
+# for cpu in system.cpu:
+#     cpu.mmu.pma_checker = PMAChecker(uncacheable=uncacheable_range)
 
 
 # ---------------------------- Default Setup --------------------------- #
