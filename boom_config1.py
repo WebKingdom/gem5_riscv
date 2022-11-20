@@ -4,12 +4,7 @@
 # ------------------------------- Notes ------------------------------- #
 
 # Use to view options:
-# $ ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py --help
-
-# Use command below to run a basic configuration:
-# $ ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs\example\cpre581\gem5_riscv\tests\hello\bin\hello -n 1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32KB --l1i_size=32KB --l2_size=524,288 --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
-
-# --num-l3caches 0 --l3_size 4MB --l3_assoc 16
+# $ ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -h
 
 # ------------------------------- Notes ------------------------------- #
 
@@ -20,7 +15,10 @@ from os import path
 import m5
 from m5.defines import buildEnv
 from m5.objects import *
-# from m5.objects.Uart import RiscvUart8250
+from m5.objects.FuncUnit import *
+from m5.objects.FuncUnitConfig import *
+from m5.SimObject import *
+
 from m5.util import addToPath, fatal, warn
 from m5.util.fdthelper import *
 from m5.params import *
@@ -42,7 +40,105 @@ from common.Caches import *
 from common import Options
 
 
-# may be useful for parsing arguments and starting simulation
+
+# ----------------------------- FuncUnitConfig ---------------------------- #
+class IntALU_1(FUDesc):
+    opList = [ OpDesc(opClass='IntAlu') ]
+    count = 4
+
+class IntMultDiv_1(FUDesc):
+    opList = [ OpDesc(opClass='IntMult', opLat=3),
+               OpDesc(opClass='IntDiv', opLat=20, pipelined=False) ]
+
+    # DIV and IDIV instructions in x86 are implemented using a loop which
+    # issues division microops.  The latency of these microops should really be
+    # one (or a small number) cycle each since each of these computes one bit
+    # of the quotient.
+    if buildEnv['TARGET_ISA'] in ('x86'):
+        opList[1].opLat=1
+
+    count=1
+
+class FP_ALU_1(FUDesc):
+    opList = [ OpDesc(opClass='FloatAdd', opLat=2),
+               OpDesc(opClass='FloatCmp', opLat=2),
+               OpDesc(opClass='FloatCvt', opLat=2) ]
+    count = 2
+
+class FP_Mult_1(FUDesc):
+    opList = [ OpDesc(opClass='FloatMult', opLat=4),
+               OpDesc(opClass='FloatMultAcc', opLat=5),
+               OpDesc(opClass='FloatMisc', opLat=3) ]
+    count = 2
+
+class FP_Div_1(FUDesc):
+    opList = [ OpDesc(opClass='FloatDiv', opLat=12, pipelined=False),
+               OpDesc(opClass='FloatSqrt', opLat=24, pipelined=False) ]
+    count = 1
+
+class SIMD_Unit_1(FUDesc):
+    opList = [ OpDesc(opClass='SimdAdd'),
+               OpDesc(opClass='SimdAddAcc'),
+               OpDesc(opClass='SimdAlu'),
+               OpDesc(opClass='SimdCmp'),
+               OpDesc(opClass='SimdCvt'),
+               OpDesc(opClass='SimdMisc'),
+               OpDesc(opClass='SimdMult'),
+               OpDesc(opClass='SimdMultAcc'),
+               OpDesc(opClass='SimdShift'),
+               OpDesc(opClass='SimdShiftAcc'),
+               OpDesc(opClass='SimdDiv'),
+               OpDesc(opClass='SimdSqrt'),
+               OpDesc(opClass='SimdFloatAdd'),
+               OpDesc(opClass='SimdFloatAlu'),
+               OpDesc(opClass='SimdFloatCmp'),
+               OpDesc(opClass='SimdFloatCvt'),
+               OpDesc(opClass='SimdFloatDiv'),
+               OpDesc(opClass='SimdFloatMisc'),
+               OpDesc(opClass='SimdFloatMult'),
+               OpDesc(opClass='SimdFloatMultAcc'),
+               OpDesc(opClass='SimdFloatSqrt'),
+               OpDesc(opClass='SimdReduceAdd'),
+               OpDesc(opClass='SimdReduceAlu'),
+               OpDesc(opClass='SimdReduceCmp'),
+               OpDesc(opClass='SimdFloatReduceAdd'),
+               OpDesc(opClass='SimdFloatReduceCmp') ]
+    count = 2
+
+class PredALU_1(FUDesc):
+    opList = [ OpDesc(opClass='SimdPredAlu') ]
+    count = 1
+
+class ReadPortInt_1(FUDesc):
+    opList = [ OpDesc(opClass='MemRead') ]
+    count = 6
+
+class WritePortInt_1(FUDesc):
+    opList = [ OpDesc(opClass='MemWrite') ]
+    count = 3
+
+class ReadPortFl_1(FUDesc):
+    opList = [ OpDesc(opClass='FloatMemRead') ]
+    count = 3
+
+class WritePortFl_1(FUDesc):
+    opList = [ OpDesc(opClass='FloatMemWrite') ]
+    count = 2
+
+class IprPort_1(FUDesc):
+    opList = [ OpDesc(opClass='IprAccess', opLat = 3, pipelined = False) ]
+    count = 1
+
+
+# ----------------------------- BoomFUPool ---------------------------- #
+# TODO ssz ensure correct latencies, pipelines, and count
+class BoomFUPool_1(DefaultFUPool):
+    FUList = [ IntALU_1(), IntMultDiv_1(), FP_ALU_1(), FP_Mult_1(), FP_Div_1(),
+               SIMD_Unit_1(), PredALU_1(), ReadPortInt_1(), WritePortInt_1(),
+               ReadPortFl_1(), WritePortFl_1(), IprPort_1() ]
+
+
+# Used for parsing arguments and starting simulation
 def get_processes(args):
     """Interprets provided args and returns a list of processes"""
 
@@ -136,6 +232,50 @@ else:
 # CPU and Memory
 (CPUClass, mem_mode, FutureClass) = Simulation.setCPUClass(args)
 CPUClass.numThreads = numThreads
+
+# TODO configure RiscvO3CPU which extends BaseO3CPU, RiscvCPU, and BaseCPU
+# check CPU type to ensure it is RiscvO3CPU
+if (not CPUClass.type == "BaseO3CPU"):
+    print("Error: CPU type is not 'BaseO3CPU'")
+    sys.exit(1)
+
+# Parameters worth considering: 
+CPUClass.syscallRetryLatency = 10000       # Cycles to wait until retry
+
+CPUClass.cacheStorePorts = 200
+CPUClass.cacheLoadPorts = 200
+
+CPUClass.fetchWidth = 4
+CPUClass.fetchBufferSize = 16               # 32 entires in fetch buffer, 16B/cycle coming in (parametrizable, so can be changed in BOOM)
+CPUClass.fetchQueueSize = 32                # 32 entries in fetch target queue (parametrizable, so can be changed in BOOM)
+CPUClass.fetchToDecodeDelay = 4             # TODO? (down pipe) IF & pre-decode takes 4 cycles. Is this before or after fetch buffer?
+CPUClass.decodeWidth = 4
+CPUClass.decodeToRenameDelay = 1            # TODO? (down pipe)
+CPUClass.renameWidth = 4
+CPUClass.renameToIEWDelay = 2               # TODO? (down pipe)
+CPUClass.issueToExecuteDelay = 1            # TODO? (down pipe)
+CPUClass.dispatchWidth = 4
+CPUClass.issueWidth = 4
+CPUClass.wbWidth = 4
+CPUClass.fuPool = BoomFUPool_1()
+CPUClass.iewToCommitDelay = 1               # TODO?(down pipe)
+CPUClass.commitWidth = 4
+CPUClass.squashWidth = 4
+CPUClass.trapLatency = 13                   # TODO? Left as default
+CPUClass.LQEntries = 32
+CPUClass.SQEntries = 32
+CPUClass.store_set_clear_period = 250000    # TODO? Number of load/store insts before the dep predictor should be invalidated
+CPUClass.LFSTSize = 1024                    # TODO? Last fetched store table size (left as default)
+CPUClass.SSITSize = 1024                    # TODO? Store set ID table size (left as default)
+CPUClass.numPhysIntRegs = 128               # parametrizable, so can be changed in BOOM
+CPUClass.numPhysFloatRegs = 128             # parametrizable, so can be changed in BOOM
+CPUClass.numPhysVecRegs = 48                # could be 48 based on an optional extension to BOOM (https://docs.boom-core.org/en/latest/sections/future-work.html?highlight=vector#the-vector-v-isa-extension)
+CPUClass.numPhysVecPredRegs = 6             # No predicate registers in BOOM
+CPUClass.numPhysCCRegs = 0                  # No conditional-code (cc) registers
+CPUClass.numIQEntries = 32                  # TODO? Number of instruction queue entries
+CPUClass.numROBEntries = 128                # parametrizable, so can be changed in BOOM
+
+
 MemClass = Simulation.setMemClass(args)
 np = args.num_cpus
 mp0_path = multiprocesses[0].executable
@@ -157,42 +297,12 @@ system.membus = MemBus()    # TODO? difference between SystemXBar() and MemBus()
 
 system.system_port = system.membus.cpu_side_ports
 
-# TODO ssz HiFive platform not working correctly.
-# system.platform = HiFive()
-
-# RTCCLK (Set to 100MHz for faster simulation)
-# system.platform.rtc = RiscvRTC(frequency=Frequency("100MHz"))
-# system.platform.clint.int_pin = system.platform.rtc.int_pin
-
-# No need for CLINT due to no peripherals and interrupts
-# clint = Param.Clint(Clint(pio_addr=0x2000000), "CLINT")
-
-# No need for PLIC due to no peripherals and interrupts
-# plic = Param.Plic(Plic(pio_addr=0x3000000), "PLIC")
-
-# Uart requires PLIC and is not needed
-# uart = RiscvUart8250(pio_addr=0x10000000)
-
-# VirtIORng
-# if args.virtio_rng:
-#     system.platform.rng = RiscvMmioVirtIO(
-#         vio=VirtIORng(),
-#         interrupt_id=0x8,
-#         pio_size=4096,
-#         pio_addr=0x10007000
-#     )
-
 uncacheable_range = AddrRange(start=0x10000000, size=0x8)
 
 system.bridge = Bridge(delay='50ns')
 system.bridge.mem_side_port = system.iobus.cpu_side_ports
 system.bridge.cpu_side_port = system.membus.mem_side_ports
 system.bridge.ranges = [uncacheable_range]   # Should only include UART but we do not use it so it may have a range of 0. system.platform._off_chip_ranges() AddrRange[0x10000000, 0x8]
-
-# system.platform.attachOnChipIO(system.membus)
-# system.platform.attachOffChipIO(system.iobus)
-# system.platform.attachPlic()
-# system.platform.setNumCores(np)
 
 
 # ---------------------------- Default Setup --------------------------- #
@@ -294,16 +404,23 @@ Simulation.run(args, root, system, FutureClass)
 
 """
 hello test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
 matrix_prog test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+
+
+BOOM with CPUClass edited matrix_prog test:
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
 
 
 Test with default fs_linux.py
-./build/RISCV/gem5.opt configs/example/riscv/fs_linux.py --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
+./build/RISCV/gem5.opt configs/example/riscv/fs_linux.py --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
+# --num-l3caches 0 --l3_size 4MB --l3_assoc 16
+DDR4_2400_4x16
+DDR4_2400_16x4
 
 # ------------------------------- Options ------------------------------- #
 usage: boom_config1.py [-h] [-n NUM_CPUS] [--sys-voltage SYS_VOLTAGE] [--sys-clock SYS_CLOCK] [--list-mem-types]
