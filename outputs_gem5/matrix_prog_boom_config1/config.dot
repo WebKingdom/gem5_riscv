@@ -1048,7 +1048,7 @@ fontsize=14;
 label="workload \n: Process";
 shape=Mrecord;
 style="rounded, filled";
-tooltip="cmd&#61;tests/test-progs/hello/bin/riscv/linux/hello&#10;\cwd&#61;/home/vm-user/Documents/github/gem5&#10;\drivers&#61;&#10;\egid&#61;100&#10;\env&#61;&#10;\errout&#61;cerr&#10;\euid&#61;100&#10;\eventq_index&#61;0&#10;\executable&#61;tests/test-progs/hello/bin/riscv/linux/hello&#10;\gid&#61;1000&#10;\input&#61;cin&#10;\kvmInSE&#61;false&#10;\maxStackSize&#61;67108864&#10;\output&#61;cout&#10;\pgid&#61;100&#10;\pid&#61;100&#10;\ppid&#61;0&#10;\release&#61;5.1.0&#10;\simpoint&#61;0&#10;\system&#61;system&#10;\uid&#61;100&#10;\useArchPT&#61;false";
+tooltip="cmd&#61;configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static&#10;\cwd&#61;/home/vm-user/Documents/github/gem5&#10;\drivers&#61;&#10;\egid&#61;100&#10;\env&#61;&#10;\errout&#61;cerr&#10;\euid&#61;100&#10;\eventq_index&#61;0&#10;\executable&#61;configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static&#10;\gid&#61;1000&#10;\input&#61;cin&#10;\kvmInSE&#61;false&#10;\maxStackSize&#61;67108864&#10;\output&#61;cout&#10;\pgid&#61;100&#10;\pid&#61;100&#10;\ppid&#61;0&#10;\release&#61;5.1.0&#10;\simpoint&#61;0&#10;\system&#61;system&#10;\uid&#61;100&#10;\useArchPT&#61;false";
 }
 
 subgraph cluster_system_cpu_branchPred {

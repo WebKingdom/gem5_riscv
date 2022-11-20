@@ -1043,7 +1043,7 @@
                         "name": "workload",
                         "path": "system.cpu.workload",
                         "cmd": [
-                            "tests/test-progs/hello/bin/riscv/linux/hello"
+                            "configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static"
                         ],
                         "cwd": "/home/vm-user/Documents/github/gem5",
                         "drivers": [],
@@ -1052,7 +1052,7 @@
                         "errout": "cerr",
                         "euid": 100,
                         "eventq_index": 0,
-                        "executable": "tests/test-progs/hello/bin/riscv/linux/hello",
+                        "executable": "configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static",
                         "gid": 1000,
                         "input": "cin",
                         "kvmInSE": false,

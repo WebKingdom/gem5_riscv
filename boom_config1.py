@@ -37,6 +37,7 @@ from common import CacheConfig
 from common import CpuConfig
 from common import MemConfig
 from common import ObjectList
+from common.FileSystemConfig import config_filesystem
 from common.Caches import *
 from common import Options
 
@@ -105,7 +106,27 @@ args = parser.parse_args()
 multiprocesses = []
 numThreads = 1
 
-if args.cmd:
+if args.bench:
+    apps = args.bench.split("-")
+    if len(apps) != args.num_cpus:
+        print("number of benchmarks not equal to set num_cpus!")
+        sys.exit(1)
+
+    for app in apps:
+        try:
+            if buildEnv['TARGET_ISA'] == 'arm':
+                exec("workload = %s('arm_%s', 'linux', '%s')" % (
+                        app, args.arm_iset, args.spec_input))
+            else:
+                exec("workload = %s(buildEnv['TARGET_ISA', 'linux', '%s')" % (
+                        app, args.spec_input))
+            multiprocesses.append(workload.makeProcess())
+        except:
+            print("Unable to find workload for %s: %s" %
+                  (buildEnv['TARGET_ISA'], app),
+                  file=sys.stderr)
+            sys.exit(1)
+elif args.cmd:
     multiprocesses, numThreads = get_processes(args)
     print("numThreads: " + str(numThreads))
 else:
@@ -120,12 +141,16 @@ np = args.num_cpus
 mp0_path = multiprocesses[0].executable
 print("mp0_path: " + str(mp0_path))
 
+# Check -- do not allow SMT with multiple CPUs
+if args.smt and args.num_cpus > 1:
+    fatal("You cannot use SMT with multiple CPUs!")
+
 
 # ---------------------------- Setup System ---------------------------- #
 system = System()
 
 system.mem_mode = mem_mode
-system.mem_ranges = [AddrRange(start=0x80000000, size=args.mem_size)]
+system.mem_ranges = [AddrRange(start=0x40000000, size=args.mem_size)]
 
 system.iobus = IOXBar()
 system.membus = MemBus()    # TODO? difference between SystemXBar() and MemBus() ?
@@ -157,10 +182,12 @@ system.system_port = system.membus.cpu_side_ports
 #         pio_addr=0x10007000
 #     )
 
-# system.bridge = Bridge(delay='50ns')
-# system.bridge.mem_side_port = system.iobus.cpu_side_ports
-# system.bridge.cpu_side_port = system.membus.mem_side_ports
-# system.bridge.ranges = system.platform._off_chip_ranges()   # Should only include UART but we do not use it so it may have a range of 0. system.platform._off_chip_ranges() AddrRange[0x10000000, 0x8]
+uncacheable_range = AddrRange(start=0x10000000, size=0x8)
+
+system.bridge = Bridge(delay='50ns')
+system.bridge.mem_side_port = system.iobus.cpu_side_ports
+system.bridge.cpu_side_port = system.membus.mem_side_ports
+system.bridge.ranges = [uncacheable_range]   # Should only include UART but we do not use it so it may have a range of 0. system.platform._off_chip_ranges() AddrRange[0x10000000, 0x8]
 
 # system.platform.attachOnChipIO(system.membus)
 # system.platform.attachOffChipIO(system.iobus)
@@ -193,6 +220,7 @@ if args.caches or args.l2cache:
     system.iocache.cpu_side = system.iobus.mem_side_ports
     system.iocache.mem_side = system.membus.cpu_side_ports
 elif not args.external_memory_system:
+    print("Attaching iobridge since not external_memory_system")
     system.iobridge = Bridge(delay='50ns', ranges=system.mem_ranges)
     system.iobridge.cpu_side_port = system.iobus.mem_side_ports
     system.iobridge.mem_side_port = system.membus.cpu_side_ports
@@ -220,8 +248,10 @@ for i in range(np):
     
     if args.simpoint_profile:
         system.cpu[i].addSimPointProbe(args.simpoint_interval)
+    
     if args.checker:
         system.cpu[i].addCheckerCpu()
+    
     if not ObjectList.is_kvm_cpu(CPUClass):
         if args.bp_type:
             bpClass = ObjectList.bp_list.get(args.bp_type)
@@ -229,20 +259,16 @@ for i in range(np):
         if args.indirect_bp_type:
             IndirectBPClass = ObjectList.indirect_bp_list.get(args.indirect_bp_type)
             system.cpu[i].branchPred.indirectBranchPred = IndirectBPClass()
+    
     system.cpu[i].createThreads()
 
 
 # ----------------------------- PMA Checker ---------------------------- #
-# uncacheable_range = [
-#     *system.platform._on_chip_ranges(),
-#     *system.platform._off_chip_ranges()
-# ]
-
 # PMA checker can be defined at system-level (system.pma_checker)
 # or MMU-level (system.cpu[0].mmu.pma_checker). It will be resolved
 # by RiscvTLB's Parent.any proxy
-# for cpu in system.cpu:
-#     cpu.mmu.pma_checker = PMAChecker(uncacheable=[uncacheable_range])
+for cpu in system.cpu:
+    cpu.mmu.pma_checker = PMAChecker(uncacheable=[uncacheable_range])
 
 
 # ---------------------------- Default Setup --------------------------- #
@@ -252,6 +278,8 @@ if args.elastic_trace_en and args.checkpoint_restore == None and not args.fast_f
 CacheConfig.config_cache(args, system)
 
 MemConfig.config_mem(args, system)
+
+config_filesystem(system, args)
 
 system.workload = SEWorkload.init_compatible(mp0_path)
 
@@ -263,18 +291,14 @@ Simulation.setWorkCountOptions(system, args)
 Simulation.run(args, root, system, FutureClass)
 
 
-# fs_linux.py setup
-# root = Root(full_system=False, system=system)
-# Simulation.setWorkCountOptions(system, args)
-# Simulation.run(args, root, system, FutureClass)
-
 
 """
+hello test:
 ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c tests/test-progs/hello/bin/riscv/linux/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
 
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cpu-type=RiscvO3CPU --bp-type=TAGE --cpu-clock=2GHz 
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c tests/test-progs/hello/bin/riscv/linux/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cpu-type=RiscvO3CPU --bp-type=TAGE --cpu-clock=2GHz
+matrix_prog test:
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-channels=2 --mem-ranks=2 --mem-size=4GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=64 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=2GHz 
+
 
 
 Test with default fs_linux.py
