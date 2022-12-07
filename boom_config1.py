@@ -413,8 +413,11 @@ matrix_prog test:
 riscv-tests qsort test:
 ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/bin/qsort.riscv --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
-
+riscv-tests median test (modified):
 ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/median/src/median_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+
+riscv-tests qsort test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/qsort/src/qsort_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
 
 
