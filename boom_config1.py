@@ -115,7 +115,7 @@ class ReadPortInt_1(FUDesc):
 
 class WritePortInt_1(FUDesc):
     opList = [ OpDesc(opClass='MemWrite') ]
-    count = 4   # 3 -> 4
+    count = 3   # 3 -> 4
 
 class ReadPortFl_1(FUDesc):
     opList = [ OpDesc(opClass='FloatMemRead') ]
@@ -393,27 +393,27 @@ MemConfig.config_mem(args, system)
 # default parameters shown in comments
 for i in range(np):
     # dcache
-    system.cpu[i].dcache.data_latency = 1                       # 2
+    system.cpu[i].dcache.data_latency = 2                       # 2
     system.cpu[i].dcache.mshrs = 4                              # 4
-    system.cpu[i].dcache.prefetch_on_access = False             # False
-    system.cpu[i].dcache.prefetch_on_pf_hit = False             # False
-    system.cpu[i].dcache.response_latency = 1                   # 2
-    system.cpu[i].dcache.tag_latency = 1                        # 2
+    # system.cpu[i].dcache.prefetch_on_access = False             # False
+    # system.cpu[i].dcache.prefetch_on_pf_hit = False             # False
+    system.cpu[i].dcache.response_latency = 2                   # 2
+    system.cpu[i].dcache.tag_latency = 2                        # 2
     system.cpu[i].dcache.tgts_per_mshr = 20                     # 20
     system.cpu[i].dcache.write_buffers = 8                      # 8
     
     # dcache prefecher
-    system.cpu[i].dcache.prefetcher.latency = 1                 # 1
-    system.cpu[i].dcache.prefetcher.prefetch_on_access = False  # False
-    system.cpu[i].dcache.prefetcher.prefetch_on_pf_hit = False  # False
+    # system.cpu[i].dcache.prefetcher.latency = 1                 # 1
+    # system.cpu[i].dcache.prefetcher.prefetch_on_access = False  # False
+    # system.cpu[i].dcache.prefetcher.prefetch_on_pf_hit = False  # False
     
-    system.cpu[i].dcache.tags.tag_latency = 1                      # 2
+    system.cpu[i].dcache.tags.tag_latency = 2                   # 2
 
     system.cpu[i].dtb_walker_cache.assoc = 2                    # 2
     system.cpu[i].dtb_walker_cache.data_latency = 2             # 2
     system.cpu[i].dtb_walker_cache.mshrs = 10                   # 10
-    system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
-    system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
+    # system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
+    # system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
     system.cpu[i].dtb_walker_cache.response_latency = 2         # 2
     system.cpu[i].dtb_walker_cache.tag_latency = 2              # 2
     system.cpu[i].dtb_walker_cache.tgts_per_mshr = 12           # 12
@@ -422,27 +422,27 @@ for i in range(np):
     system.cpu[i].dtb_walker_cache.tags.tag_latency = 2         # 2
 
     # icache
-    system.cpu[i].icache.data_latency = 1                       # 2
+    system.cpu[i].icache.data_latency = 2                       # 2
     system.cpu[i].icache.mshrs = 4                              # 4
-    system.cpu[i].icache.prefetch_on_access = False             # False
-    system.cpu[i].icache.prefetch_on_pf_hit = False             # False
-    system.cpu[i].icache.response_latency = 1                   # 2
-    system.cpu[i].icache.tag_latency = 1                        # 2
+    # system.cpu[i].icache.prefetch_on_access = False             # False
+    # system.cpu[i].icache.prefetch_on_pf_hit = False             # False
+    system.cpu[i].icache.response_latency = 2                   # 2
+    system.cpu[i].icache.tag_latency = 2                        # 2
     system.cpu[i].icache.tgts_per_mshr = 20                     # 20
     system.cpu[i].icache.write_buffers = 8                      # 8
     
     # icache prefecher
-    system.cpu[i].icache.prefetcher.latency = 1                 # 1
-    system.cpu[i].icache.prefetcher.prefetch_on_access = False  # False
-    system.cpu[i].icache.prefetcher.prefetch_on_pf_hit = False  # False
+    # system.cpu[i].icache.prefetcher.latency = 1                 # 1
+    # system.cpu[i].icache.prefetcher.prefetch_on_access = False  # False
+    # system.cpu[i].icache.prefetcher.prefetch_on_pf_hit = False  # False
     
-    system.cpu[i].icache.tags.tag_latency = 1                      # 2
+    system.cpu[i].icache.tags.tag_latency = 2                   # 2
     
     system.cpu[i].itb_walker_cache.assoc = 2                    # 2
     system.cpu[i].itb_walker_cache.data_latency = 2             # 2
     system.cpu[i].itb_walker_cache.mshrs = 10                   # 10
-    system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
-    system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
+    # system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
+    # system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
     system.cpu[i].itb_walker_cache.response_latency = 2         # 2
     system.cpu[i].itb_walker_cache.tag_latency = 2              # 2
     system.cpu[i].itb_walker_cache.tgts_per_mshr = 12           # 12
@@ -452,21 +452,21 @@ for i in range(np):
 
 
 # L2 cache
-system.l2.data_latency = 16                         # 20
+system.l2.data_latency = 18                         # 20
 system.l2.mshrs = 20                                # 20
-system.l2.prefetch_on_access = False                # False
-system.l2.prefetch_on_pf_hit = False                # False
-system.l2.response_latency = 16                     # 20
-system.l2.tag_latency = 16                          # 20
+# system.l2.prefetch_on_access = False                # False
+# system.l2.prefetch_on_pf_hit = False                # False
+system.l2.response_latency = 18                     # 20
+system.l2.tag_latency = 18                          # 20
 system.l2.tgts_per_mshr = 12                        # 12
 system.l2.write_buffers = 8                         # 8
 
 # L2 cache prefecher
-system.l2.prefetcher.latency = 1                    # 1
-system.l2.prefetcher.prefetch_on_access = False     # False
-system.l2.prefetcher.prefetch_on_pf_hit = False     # False
+# system.l2.prefetcher.latency = 1                    # 1
+# system.l2.prefetcher.prefetch_on_access = False     # False
+# system.l2.prefetcher.prefetch_on_pf_hit = False     # False
 
-system.l2.tags.tag_latency = 16                     # 20
+system.l2.tags.tag_latency = 18                     # 20
 
 
 # !!! CAUTION WHEN ADJUSTING !!! Fine tune delay
@@ -507,30 +507,37 @@ Simulation.run(args, root, system, FutureClass)
 
 """
 hello test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/hello/bin/hello --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
 matrix_prog test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
-
-riscv-tests qsort test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/bin/qsort.riscv --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
 
 riscv-tests median test (modified):
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/median/src/median_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/median/src/median_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
+
+riscv-tests multiply test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/multiply/src/multiply_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
 riscv-tests qsort test (modified):
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/qsort/src/qsort_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/qsort/src/qsort_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
+riscv-tests rsort test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/rsort/src/rsort.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
+riscv-tests spmv test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/spmv/src/spmv_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
-BOOM with CPUClass edited matrix_prog test:
-./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+riscv-tests towers test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/towers/src/towers_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
+
+riscv-tests vvadd test (modified):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/vvadd/src/vvadd_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
 
 
 Test with default fs_linux.py
-./build/RISCV/gem5.opt configs/example/riscv/fs_linux.py --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=TAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=BOPPrefetcher --l1d-hwp-type=BOPPrefetcher --l2-hwp-type=BOPPrefetcher --cpu-clock=1GHz 
+./build/RISCV/gem5.opt configs/example/riscv/fs_linux.py --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
 # --num-l3caches 0 --l3_size 4MB --l3_assoc 16
 DDR4_2400_4x16
