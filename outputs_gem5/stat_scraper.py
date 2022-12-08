@@ -2,7 +2,7 @@ import sys
 # import pandas as pd
 import csv
 
-# should be in order of gem5 stats output
+# unique keys to search fro in gem5 stats.txt output
 KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycles', 'issueRate', 'fuBusyRate',
         'cpu.numInsts', 'cpu.cpi', 'cpu.ipc', 'branchPred.lookups', 'branchPred.condPredicted', 'branchPred.condIncorrect',
         'branchPred.BTBLookups', 'branchPred.BTBHits', 'branchPred.BTBHitRatio', 'branchPred.RASUsed',
@@ -19,7 +19,13 @@ KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycle
         'l2.overallMissRate::cpu.inst', 'l2.overallMissRate::cpu.data', 'l2.overallMissRate::cpu.dcache.prefetcher',
         'l2.overallMissRate::cpu.icache.prefetcher', 'l2.overallMissRate::total', 'l2.overallMshrMissRate::total',
         'l2.prefetcher.accuracy', 'l2.prefetcher.coverage']
+
 NUM_KEYS = len(KEYS)
+
+FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 'median_riscv_boom_config1/stats.txt'),
+              ('multiply', 'multiply_riscv_boom_config1/stats.txt'), ('qsort', 'qsort_riscv_boom_config1/stats.txt'),
+              ('rsort', 'rsort_riscv_boom_config1/stats.txt'), ('spmv', 'spmv_riscv_boom_config1/stats.txt'),
+              ('towers', 'towers_riscv_boom_config1/stats.txt'), ('vvadd', 'vvadd_riscv_boom_config1/stats.txt')]
 
 
 # check if input string contains any of the KEYS and return key index
@@ -33,8 +39,9 @@ def contains_any_key(string):
 # parses a given file at file_path
 def parse_file(file_path):
     dict_list = []
+    stat_list = []
     num_keys_found = 0
-    
+
     with open(file_path) as f:
         for line in f:
             line = line.strip()
@@ -42,13 +49,31 @@ def parse_file(file_path):
             if (key_idx >= 0):
                 line_list = line.split()
                 dict_list.append((str(KEYS[key_idx]), line_list[1]))
+                stat_list.append(line_list[1])
                 num_keys_found += 1
-    
-    if (num_keys_found == len(dict_list)):
-        print('Found all KEYS')
-    print(dict_list)
+
+    # print(dict_list)
+    return ((num_keys_found == len(dict_list)), stat_list)
 
 
-parse_file("median_riscv_boom_config1/stats.txt")
+# write parsed data to CSV
+def write_csv(file_path):
+    with open(file_path, 'w') as f:
+        writer = csv.writer(f)
+        header = KEYS
+        header.insert(0, 'Benchmark')
+        writer.writerow(header)
 
-print("Done")
+        # pare and write to csv all stats.txt
+        for fp in FILE_PATHS:
+            found_all_keys, stat_list = parse_file(fp[1])
+            stat_list.insert(0, fp[0])
+            if (found_all_keys):
+                print('Found all KEYS, writing data from: ' + str(fp[1]))
+                writer.writerow(stat_list)
+            else:
+                print('ERROR: Not all KEYS found in: ' + str(fp[1]))
+
+
+write_csv('gem5_stats.csv')
+print('Done')
