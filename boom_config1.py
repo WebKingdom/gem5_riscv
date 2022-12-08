@@ -115,7 +115,7 @@ class ReadPortInt_1(FUDesc):
 
 class WritePortInt_1(FUDesc):
     opList = [ OpDesc(opClass='MemWrite') ]
-    count = 3
+    count = 4   # 3 -> 4
 
 class ReadPortFl_1(FUDesc):
     opList = [ OpDesc(opClass='FloatMemRead') ]
@@ -388,6 +388,109 @@ if args.elastic_trace_en and args.checkpoint_restore == None and not args.fast_f
 CacheConfig.config_cache(args, system)
 
 MemConfig.config_mem(args, system)
+
+# TODO further configure cache latencies, DTB, ITB, and branch predictor
+# default parameters shown in comments
+for i in range(np):
+    # dcache
+    system.cpu[i].dcache.data_latency = 1                       # 2
+    system.cpu[i].dcache.mshrs = 4                              # 4
+    system.cpu[i].dcache.prefetch_on_access = False             # False
+    system.cpu[i].dcache.prefetch_on_pf_hit = False             # False
+    system.cpu[i].dcache.response_latency = 1                   # 2
+    system.cpu[i].dcache.tag_latency = 1                        # 2
+    system.cpu[i].dcache.tgts_per_mshr = 20                     # 20
+    system.cpu[i].dcache.write_buffers = 8                      # 8
+    
+    # dcache prefecher
+    system.cpu[i].dcache.prefetcher.latency = 1                 # 1
+    system.cpu[i].dcache.prefetcher.prefetch_on_access = False  # False
+    system.cpu[i].dcache.prefetcher.prefetch_on_pf_hit = False  # False
+    
+    system.cpu[i].dcache.tags.tag_latency = 1                      # 2
+
+    system.cpu[i].dtb_walker_cache.assoc = 2                    # 2
+    system.cpu[i].dtb_walker_cache.data_latency = 2             # 2
+    system.cpu[i].dtb_walker_cache.mshrs = 10                   # 10
+    system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
+    system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
+    system.cpu[i].dtb_walker_cache.response_latency = 2         # 2
+    system.cpu[i].dtb_walker_cache.tag_latency = 2              # 2
+    system.cpu[i].dtb_walker_cache.tgts_per_mshr = 12           # 12
+    system.cpu[i].dtb_walker_cache.write_buffers = 8            # 8
+    
+    system.cpu[i].dtb_walker_cache.tags.tag_latency = 2         # 2
+
+    # icache
+    system.cpu[i].icache.data_latency = 1                       # 2
+    system.cpu[i].icache.mshrs = 4                              # 4
+    system.cpu[i].icache.prefetch_on_access = False             # False
+    system.cpu[i].icache.prefetch_on_pf_hit = False             # False
+    system.cpu[i].icache.response_latency = 1                   # 2
+    system.cpu[i].icache.tag_latency = 1                        # 2
+    system.cpu[i].icache.tgts_per_mshr = 20                     # 20
+    system.cpu[i].icache.write_buffers = 8                      # 8
+    
+    # icache prefecher
+    system.cpu[i].icache.prefetcher.latency = 1                 # 1
+    system.cpu[i].icache.prefetcher.prefetch_on_access = False  # False
+    system.cpu[i].icache.prefetcher.prefetch_on_pf_hit = False  # False
+    
+    system.cpu[i].icache.tags.tag_latency = 1                      # 2
+    
+    system.cpu[i].itb_walker_cache.assoc = 2                    # 2
+    system.cpu[i].itb_walker_cache.data_latency = 2             # 2
+    system.cpu[i].itb_walker_cache.mshrs = 10                   # 10
+    system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
+    system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
+    system.cpu[i].itb_walker_cache.response_latency = 2         # 2
+    system.cpu[i].itb_walker_cache.tag_latency = 2              # 2
+    system.cpu[i].itb_walker_cache.tgts_per_mshr = 12           # 12
+    system.cpu[i].itb_walker_cache.write_buffers = 8            # 8
+    
+    system.cpu[i].itb_walker_cache.tags.tag_latency = 2         # 2
+
+
+# L2 cache
+system.l2.data_latency = 16                         # 20
+system.l2.mshrs = 20                                # 20
+system.l2.prefetch_on_access = False                # False
+system.l2.prefetch_on_pf_hit = False                # False
+system.l2.response_latency = 16                     # 20
+system.l2.tag_latency = 16                          # 20
+system.l2.tgts_per_mshr = 12                        # 12
+system.l2.write_buffers = 8                         # 8
+
+# L2 cache prefecher
+system.l2.prefetcher.latency = 1                    # 1
+system.l2.prefetcher.prefetch_on_access = False     # False
+system.l2.prefetcher.prefetch_on_pf_hit = False     # False
+
+system.l2.tags.tag_latency = 16                     # 20
+
+
+# !!! CAUTION WHEN ADJUSTING !!! Fine tune delay
+# system.cpu.commitToDecodeDelay=1
+# system.cpu.commitToFetchDelay=1
+# system.cpu.commitToIEWDelay=1
+# system.cpu.commitToRenameDelay=1
+# system.cpu.decodeToFetchDelay=1
+# system.cpu.decodeToRenameDelay=1
+# system.cpu.fetchToDecodeDelay=4
+# system.cpu.fetchTrapLatency=1
+# system.cpu.iewToCommitDelay=1
+# system.cpu.iewToDecodeDelay=1
+# system.cpu.iewToFetchDelay=1
+# system.cpu.iewToRenameDelay=1
+# system.cpu.issueToExecuteDelay=1
+# system.cpu.pwr_gating_latency=300
+# system.cpu.renameToDecodeDelay=1
+# system.cpu.renameToFetchDelay=1
+# system.cpu.renameToIEWDelay=2
+# system.cpu.renameToROBDelay=1
+# system.cpu.syscallRetryLatency=10000
+# system.cpu.trapLatency=13
+
 
 config_filesystem(system, args)
 
