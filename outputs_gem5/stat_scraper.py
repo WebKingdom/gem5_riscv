@@ -20,7 +20,6 @@ KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycle
         'l2.overallMissRate::cpu.icache.prefetcher', 'l2.overallMissRate::total', 'l2.overallMshrMissRate::total',
         'l2.prefetcher.accuracy', 'l2.prefetcher.coverage']
 
-NUM_KEYS = len(KEYS)
 
 FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 'median_riscv_boom_config1/stats.txt'),
               ('multiply', 'multiply_riscv_boom_config1/stats.txt'), ('qsort', 'qsort_riscv_boom_config1/stats.txt'),
@@ -28,9 +27,16 @@ FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 
               ('towers', 'towers_riscv_boom_config1/stats.txt'), ('vvadd', 'vvadd_riscv_boom_config1/stats.txt')]
 
 
+def print_regex_keys():
+    ret = ''
+    for key in KEYS:
+        ret += (key + '|')
+    print(ret)
+
+
 # check if input string contains any of the KEYS and return key index
 def contains_any_key(string):
-    for i in range(NUM_KEYS):
+    for i in range(len(KEYS)):
         if (string.__contains__(KEYS[i])):
             return i
     return -1
@@ -53,7 +59,7 @@ def parse_file(file_path):
                 num_keys_found += 1
 
     # print(dict_list)
-    return ((num_keys_found == len(dict_list)), stat_list)
+    return ((num_keys_found == len(stat_list)), stat_list)
 
 
 # write parsed data to CSV
@@ -67,13 +73,18 @@ def write_csv(file_path):
         # pare and write to csv all stats.txt
         for fp in FILE_PATHS:
             found_all_keys, stat_list = parse_file(fp[1])
+            # print(stat_list)
             stat_list.insert(0, fp[0])
+            # print(stat_list)
+            
             if (found_all_keys):
-                print('Found all KEYS, writing data from: ' + str(fp[1]))
+                print('All ' + str(len(KEYS)) + ' KEYS, writing data from: ' + str(fp[1]))
                 writer.writerow(stat_list)
             else:
                 print('ERROR: Not all KEYS found in: ' + str(fp[1]))
 
 
+print_regex_keys()
+print('')
 write_csv('gem5_stats.csv')
 print('Done')
