@@ -67,7 +67,7 @@ class FP_ALU_1(FUDesc):
 
 class FP_Mult_1(FUDesc):
     opList = [ OpDesc(opClass='FloatMult', opLat=4),
-               OpDesc(opClass='FloatMultAcc', opLat=5),
+               OpDesc(opClass='FloatMultAcc', opLat=4),
                OpDesc(opClass='FloatMisc', opLat=3) ]
     count = 2
 
@@ -96,7 +96,7 @@ class SIMD_Unit_1(FUDesc):
                OpDesc(opClass='SimdFloatDiv'),
                OpDesc(opClass='SimdFloatMisc'),
                OpDesc(opClass='SimdFloatMult'),
-               OpDesc(opClass='SimdFloatMultAcc'),
+               OpDesc(opClass='SimdFloatMultAcc', opLat=4),
                OpDesc(opClass='SimdFloatSqrt'),
                OpDesc(opClass='SimdReduceAdd'),
                OpDesc(opClass='SimdReduceAlu'),
@@ -245,7 +245,7 @@ CPUClass.syscallRetryLatency = 10000       # Cycles to wait until retry
 CPUClass.cacheStorePorts = 200
 CPUClass.cacheLoadPorts = 200
 
-CPUClass.fetchWidth = 4
+CPUClass.fetchWidth = 8
 CPUClass.fetchBufferSize = 16               # 32 entires in fetch buffer, 16B/cycle coming in (parametrizable, so can be changed in BOOM)
 CPUClass.fetchQueueSize = 32                # 32 entries in fetch target queue (parametrizable, so can be changed in BOOM)
 CPUClass.fetchToDecodeDelay = 4             # TODO? (down pipe) IF & pre-decode takes 4 cycles. Is this before or after fetch buffer?
@@ -394,7 +394,7 @@ MemConfig.config_mem(args, system)
 for i in range(np):
     # dcache
     system.cpu[i].dcache.data_latency = 2                       # 2
-    system.cpu[i].dcache.mshrs = 4                              # 4
+    system.cpu[i].dcache.mshrs = 8                              # 4
     # system.cpu[i].dcache.prefetch_on_access = False             # False
     # system.cpu[i].dcache.prefetch_on_pf_hit = False             # False
     system.cpu[i].dcache.response_latency = 2                   # 2
@@ -409,12 +409,14 @@ for i in range(np):
     
     system.cpu[i].dcache.tags.tag_latency = 2                   # 2
 
-    system.cpu[i].dtb_walker_cache.assoc = 2                    # 2
+    # dcache TLB
+    system.cpu[i].dtb_walker_cache.assoc = 32                   # 2
     system.cpu[i].dtb_walker_cache.data_latency = 2             # 2
     system.cpu[i].dtb_walker_cache.mshrs = 10                   # 10
     # system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
     # system.cpu[i].dtb_walker_cache.prefetch_on_access = False   # False
     system.cpu[i].dtb_walker_cache.response_latency = 2         # 2
+    system.cpu[i].dtb_walker_cache.size = '1024'                # 1024
     system.cpu[i].dtb_walker_cache.tag_latency = 2              # 2
     system.cpu[i].dtb_walker_cache.tgts_per_mshr = 12           # 12
     system.cpu[i].dtb_walker_cache.write_buffers = 8            # 8
@@ -438,12 +440,13 @@ for i in range(np):
     
     system.cpu[i].icache.tags.tag_latency = 2                   # 2
     
-    system.cpu[i].itb_walker_cache.assoc = 2                    # 2
+    system.cpu[i].itb_walker_cache.assoc = 32                   # 2
     system.cpu[i].itb_walker_cache.data_latency = 2             # 2
     system.cpu[i].itb_walker_cache.mshrs = 10                   # 10
     # system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
     # system.cpu[i].itb_walker_cache.prefetch_on_access = False   # False
     system.cpu[i].itb_walker_cache.response_latency = 2         # 2
+    system.cpu[i].itb_walker_cache.size = '1024'                # 1024
     system.cpu[i].itb_walker_cache.tag_latency = 2              # 2
     system.cpu[i].itb_walker_cache.tgts_per_mshr = 12           # 12
     system.cpu[i].itb_walker_cache.write_buffers = 8            # 8
