@@ -516,6 +516,14 @@ matrix_prog test:
 ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/matrix_prog/bin/matrix_prog_riscv_static --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 
 
+riscv-coremark test (default):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-coremark/bin/coremark.riscv --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
+
+riscv-coremark test (bare):
+./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-coremark/bin/coremark.bare.riscv --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
+
+
+
 riscv-tests median test (modified):
 ./build/RISCV/gem5.opt configs/example/cpre581/gem5_riscv/boom_config1.py -c configs/example/cpre581/gem5_riscv/tests/riscv-tests/median/src/median_main.o --num-cpus=1 --sys-clock=1GHz --mem-type=DDR4_2400_8x8 --mem-size=8GB --caches --l2cache --num-l2caches=1 --l1d_size=32kB --l1i_size=32kB --l2_size=512kB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=8 --cacheline_size=16 --cpu-type=RiscvO3CPU --bp-type=LTAGE --indirect-bp-type=SimpleIndirectPredictor --l1i-hwp-type=AMPMPrefetcher --l1d-hwp-type=AMPMPrefetcher --l2-hwp-type=AMPMPrefetcher --cpu-clock=1GHz 
 

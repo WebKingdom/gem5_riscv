@@ -2,7 +2,8 @@ import sys
 # import pandas as pd
 import csv
 
-# unique keys to search fro in gem5 stats.txt output
+# unique keys to search for in gem5 stats.txt output. 
+# * should be in same order as stat output!
 KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycles', 'issueRate', 'fuBusyRate',
         'cpu.numInsts', 'cpu.cpi', 'cpu.ipc', 'branchPred.lookups', 'branchPred.condPredicted', 'branchPred.condIncorrect',
         'branchPred.BTBLookups', 'branchPred.BTBHits', 'branchPred.BTBHitRatio', 'branchPred.RASUsed',
@@ -28,10 +29,11 @@ FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 
 
 
 def print_regex_keys():
-    ret = ''
+    res = ''
     for key in KEYS:
-        ret += (key + '|')
-    print(ret)
+        res += (key + '|')
+    print(res)
+    return res
 
 
 # check if input string contains any of the KEYS and return key index
@@ -47,12 +49,17 @@ def parse_file(file_path):
     dict_list = []
     stat_list = []
     num_keys_found = 0
+    key_idx = 0
 
     with open(file_path) as f:
         for line in f:
             line = line.strip()
-            key_idx = contains_any_key(line)
-            if (key_idx >= 0):
+            next_idx = contains_any_key(line)
+            if (next_idx >= 0):
+                if (int(key_idx + 1) != next_idx):
+                    # print(str(int(key_idx + 1)) + ' ?= ' + str(next_idx))
+                    print("ERROR: KEYS found not sequential: " + KEYS[next_idx])
+                key_idx = next_idx
                 line_list = line.split()
                 dict_list.append((str(KEYS[key_idx]), line_list[1]))
                 stat_list.append(line_list[1])
@@ -78,13 +85,11 @@ def write_csv(file_path):
             # print(stat_list)
             
             if (found_all_keys):
-                print('All ' + str(len(KEYS)) + ' KEYS, writing data from: ' + str(fp[1]))
+                print('All ' + str(len(KEYS)) + ' KEYS found, writing data from: ' + str(fp[1]))
                 writer.writerow(stat_list)
             else:
                 print('ERROR: Not all KEYS found in: ' + str(fp[1]))
 
 
-print_regex_keys()
-print('')
 write_csv('gem5_stats.csv')
 print('Done')
