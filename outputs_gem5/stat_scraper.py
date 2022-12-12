@@ -16,9 +16,9 @@ KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycle
         'dcache.prefetcher.coverage', 'icache.overallMissRate::total', 'icache.overallAvgMissLatency::total',
         'icache.overallMshrMissRate::total', 'icache.overallAvgMshrMissLatency::total', 'icache.ReadReq.missRate::total',
         'icache.ReadReq.avgMissLatency::total', 'icache.ReadReq.mshrMissRate::total',
-        'icache.ReadReq.avgMshrMissLatency::total', 'icache.prefetcher.accuracy', 'icache.prefetcher.coverage',
+        'icache.ReadReq.avgMshrMissLatency::total',
         'l2.overallMissRate::cpu.inst', 'l2.overallMissRate::cpu.data', 'l2.overallMissRate::cpu.dcache.prefetcher',
-        'l2.overallMissRate::cpu.icache.prefetcher', 'l2.overallMissRate::total', 'l2.overallMshrMissRate::total',
+        'l2.overallMissRate::total', 'l2.overallMshrMissRate::total',
         'l2.prefetcher.accuracy', 'l2.prefetcher.coverage']
 
 
@@ -57,7 +57,6 @@ def parse_file(file_path):
             next_idx = contains_any_key(line)
             if (next_idx >= 0):
                 if (int(key_idx + 1) != next_idx):
-                    # print(str(int(key_idx + 1)) + ' ?= ' + str(next_idx))
                     print("ERROR: KEYS found not sequential: " + KEYS[next_idx])
                 key_idx = next_idx
                 line_list = line.split()
@@ -65,7 +64,6 @@ def parse_file(file_path):
                 stat_list.append(line_list[1])
                 num_keys_found += 1
 
-    # print(dict_list)
     return ((num_keys_found == len(stat_list)), stat_list)
 
 
@@ -77,12 +75,10 @@ def write_csv(file_path):
         header.insert(0, 'Benchmark')
         writer.writerow(header)
 
-        # pare and write to csv all stats.txt
+        # parse and write to csv all stats.txt
         for fp in FILE_PATHS:
             found_all_keys, stat_list = parse_file(fp[1])
-            # print(stat_list)
             stat_list.insert(0, fp[0])
-            # print(stat_list)
             
             if (found_all_keys):
                 print('All ' + str(len(KEYS)) + ' KEYS found, writing data from: ' + str(fp[1]))
