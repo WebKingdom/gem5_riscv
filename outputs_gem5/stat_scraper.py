@@ -4,14 +4,14 @@ import csv
 
 # unique keys to search for in gem5 stats.txt output. 
 # * should be in same order as stat output!
-KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycles', 'issueRate', 'fuBusyRate',
+KEYS_temp = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycles', 'issueRate', 'fuBusyRate',
         'cpu.numInsts', 'cpu.cpi', 'cpu.ipc', 'branchPred.lookups', 'branchPred.condPredicted', 'branchPred.condIncorrect',
         'branchPred.BTBLookups', 'branchPred.BTBHits', 'branchPred.BTBHitRatio', 'branchPred.RASUsed',
         'branchPred.RASIncorrect', 'branchPred.indirectLookups', 'branchPred.indirectMisses',
         'branchPred.indirectMispredicted', 'dcache.overallMissRate::total', 'dcache.overallAvgMissLatency::total',
         'dcache.overallMshrMissRate::total', 'dcache.overallAvgMshrMissLatency::total', 'dcache.ReadReq.missRate::total',
         'dcache.ReadReq.avgMissLatency::total', 'dcache.ReadReq.mshrMissRate::total',
-        'dcache.ReadReq.avgMshrMissLatency::total', 'dcache.SwapReq.missRate::total', 'dcache.WriteReq.missRate::total',
+        'dcache.ReadReq.avgMshrMissLatency::total', 'dcache.WriteReq.missRate::total',
         'dcache.WriteReq.avgMissLatency::total', 'dcache.WriteReq.mshrMissRate::total', 'dcache.prefetcher.accuracy',
         'dcache.prefetcher.coverage', 'icache.overallMissRate::total', 'icache.overallAvgMissLatency::total',
         'icache.overallMshrMissRate::total', 'icache.overallAvgMshrMissLatency::total', 'icache.ReadReq.missRate::total',
@@ -22,10 +22,34 @@ KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycle
         'l2.prefetcher.accuracy', 'l2.prefetcher.coverage']
 
 
-FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 'median_riscv_boom_config1/stats.txt'),
+KEYS = ['simSeconds', 'simTicks', 'hostSeconds', 'simInsts', 'simOps', 'numCycles', 'issueRate', 'fuBusyRate',
+        'cpu.numInsts', 'cpu.cpi', 'cpu.ipc', 'branchPred.lookups', 'branchPred.condPredicted', 'branchPred.condIncorrect',
+        'branchPred.BTBLookups', 'branchPred.BTBHits', 'branchPred.BTBHitRatio', 'branchPred.RASUsed',
+        'branchPred.RASIncorrect', 'branchPred.indirectLookups', 'branchPred.indirectMisses',
+        'branchPred.indirectMispredicted', 'dcache.overallMissRate::total', 'dcache.overallAvgMissLatency::total',
+        'dcache.overallMshrMissRate::total', 'dcache.overallAvgMshrMissLatency::total', 'dcache.ReadReq.missRate::total',
+        'dcache.ReadReq.avgMissLatency::total', 'dcache.ReadReq.mshrMissRate::total',
+        'dcache.ReadReq.avgMshrMissLatency::total', 'dcache.WriteReq.missRate::total',
+        'dcache.WriteReq.avgMissLatency::total', 'dcache.WriteReq.mshrMissRate::total', 'dcache.prefetcher.accuracy',
+        'dcache.prefetcher.coverage', 'icache.overallMissRate::total', 'icache.overallAvgMissLatency::total',
+        'icache.overallMshrMissRate::total', 'icache.overallAvgMshrMissLatency::total', 'icache.ReadReq.missRate::total',
+        'icache.ReadReq.avgMissLatency::total', 'icache.ReadReq.mshrMissRate::total',
+        'icache.ReadReq.avgMshrMissLatency::total', 'icache.prefetcher.accuracy', 'icache.prefetcher.coverage',
+        'l2.overallMissRate::cpu.inst', 'l2.overallMissRate::cpu.data', 'l2.overallMissRate::cpu.dcache.prefetcher',
+        'l2.overallMissRate::cpu.icache.prefetcher', 'l2.overallMissRate::total', 'l2.overallMshrMissRate::total',
+        'l2.prefetcher.accuracy', 'l2.prefetcher.coverage']
+
+
+FILE_PATHS_temp = [('matrix_prog', 'matrix_prog_boom_config1/stats.txt'), ('median', 'median_riscv_boom_config1/stats.txt'),
               ('multiply', 'multiply_riscv_boom_config1/stats.txt'), ('qsort', 'qsort_riscv_boom_config1/stats.txt'),
               ('rsort', 'rsort_riscv_boom_config1/stats.txt'), ('spmv', 'spmv_riscv_boom_config1/stats.txt'),
               ('towers', 'towers_riscv_boom_config1/stats.txt'), ('vvadd', 'vvadd_riscv_boom_config1/stats.txt')]
+
+
+FILE_PATHS = [('matrix_prog', 'matrix_prog_boom_config2/stats.txt'), ('median', 'median_riscv_boom_config2/stats.txt'),
+              ('multiply', 'multiply_riscv_boom_config2/stats.txt'), ('qsort', 'qsort_riscv_boom_config2/stats.txt'),
+              ('rsort', 'rsort_riscv_boom_config2/stats.txt'), ('spmv', 'spmv_riscv_boom_config2/stats.txt'),
+              ('towers', 'towers_riscv_boom_config2/stats.txt'), ('vvadd', 'vvadd_riscv_boom_config2/stats.txt')]
 
 
 def print_regex_keys():
